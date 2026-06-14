@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prvi Post:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvFirstPost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Učitavanje..."
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="#f0f0f0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drugi Komentar:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvSecondComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Učitavanje..."
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="#f0f0f0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Broj Korisnika:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvUsersCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Učitavanje..."
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="#e3f2fd" />
+
+    </LinearLayout>
+
+</ScrollView>
