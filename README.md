@@ -1,165 +1,422 @@
-# 7. Vežba - Retrofit HTTP Zahtevi
+# 🚀 Vežba 7 — Retrofit HTTP Zahtevi (Cheat-sheet za kolokvijum)
 
-## 📋 Pregled Projekta
+## ❓ ZADATAK
+> 1. Podesiti retrofit i omogućiti slanje HTTP zahteva ka sajtu `https://app.beeceptor.com/mock-server/dummy-json`.  
+> 2. Kreirati potrebne klase u modelu potrebne za postove, korisnike i komentare.  
+> 3. Odraditi GET zahteve za prvi post i drugi komentar i ispisati ih u posebnim TextView poljima.  
+> 4. U Toast poruci prikazati koliko ima korisnika.
 
-Ovaj projekat implementira **HTTP zahteve korišćenjem Retrofit biblioteke** ka mock serveru na adresi https://app.beeceptor.com/mock-server/.
+---
 
-## ✅ Šta je Urađeno
+# 📋 DEO 1: PODESITI RETROFIT I OMOGUĆITI HTTP ZAHTEVE
 
-### 1. **Konfiguracija Retrofit-a**
-- Dodate zavisnosti u `build.gradle`:
-  - `com.squareup.retrofit2:retrofit:2.9.0`
-  - `com.squareup.retrofit2:converter-gson:2.9.0`
+## Šta trebam da dodam?
 
-### 2. **Model Klase** (u paketu `com.example.vezbe7.model`)
-- **User.java** - Predstavlja korisnika sa poljima:
-  - `id` - ID korisnika
-  - `firstName` - Ime
-  - `lastName` - Prezime
-  - `email` - Email adresa
-  - `phone` - Telefonski broj
+**Gde:** `app/build.gradle` sekcija `dependencies`
 
-- **Post.java** - Predstavlja post sa poljima:
-  - `id` - ID posta
-  - `userId` - ID korisnika koji je kreirao post
-  - `title` - Naslov posta
-  - `body` - Sadržaj posta
-
-- **Comment.java** - Predstavlja komentar sa poljima:
-  - `id` - ID komentara
-  - `postId` - ID posta na kojem je komentar
-  - `name` - Ime autora komentara
-  - `email` - Email autora
-  - `body` - Tekst komentara
-
-### 3. **API Servis** (u paketu `com.example.vezbe7.api`)
-- **ApiService.java** - Interface sa GET zahtevima:
-  ```java
-  @GET("posts")
-  Call<List<Post>> getPosts();
-  
-  @GET("comments")
-  Call<List<Comment>> getComments();
-  
-  @GET("users")
-  Call<List<User>> getUsers();
-  ```
-
-- **RetrofitClient.java** - Singleton klasa za Retrofit inicijalizaciju:
-  - `BASE_URL = "https://app.beeceptor.com/mock-server/"`
-  - Koristi Gson converter za serijalizaciju/deserijalizaciju JSON-a
-
-### 4. **MainActivity Logika**
-Implementirani su sledeći zahtevi:
-
-#### a) **GET zahtev za prvi post**
-```java
-loadFirstPost() {
-  - Učitava sve postove sa API-ja
-  - Prikazuje PRVI post u TextView (tvFirstPost)
-  - Prikazuje: ID, Korisnik ID, Naslov i Tekst
-}
+**KOPIRAJ I LEPIM:**
+```groovy
+// Retrofit & Gson
+implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 ```
 
-#### b) **GET zahtev za drugi komentar**
-```java
-loadSecondComment() {
-  - Učitava sve komentare sa API-ja
-  - Prikazuje DRUGI komentar u TextView (tvSecondComment)
-  - Prikazuje: ID, Post ID, Ime autora, Email i Tekst
-}
-```
+Posle: **Sync Now** (desni klik ili Ctrl+Enter).
 
-#### c) **GET zahtev za broj korisnika**
-```java
-loadUsersCount() {
-  - Učitava sve korisnike sa API-ja
-  - Prikazuje broj korisnika u TextView (tvUsersCount)
-  - Prikazuje Toast poruku sa brojem korisnika
-}
-```
+---
 
-### 5. **Layout** (`activity_main.xml`)
-Tri TextView polja za prikaz podataka:
-- `tvFirstPost` - Prvi post
-- `tvSecondComment` - Drugi komentar
-- `tvUsersCount` - Broj korisnika
+## Dodaj INTERNET permisiju
 
-### 6. **Permisije**
-Dodata INTERNET permisija u `AndroidManifest.xml`:
+**Gde:** `app/src/main/AndroidManifest.xml` (pre `</manifest>`)
+
+**KOPIRAJ I LEPIM:**
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-## 🔧 Kako Funkcioniše?
+---
 
-1. **App se pokreće** → MainActivity se učitava
-2. **onCreate()** → Pozivaju se tri metode za učitavanje podataka
-3. **API zahtevi** se izvršavaju asinkreno (Callback)
-4. **Odgovori se obrađuju** i prikazuju u TextView poljima
-5. **Toast** automatski prikazuje broj korisnika kad je učitan
+## Kreiraj `RetrofitClient.java`
 
-## 📱 Testiranje
+**Gde:** `app/src/main/java/com/example/vezbe7/api/RetrofitClient.java`
 
-Za testiranje aplikacije:
-1. Preuzmite projekat u Android Studio
-2. Pokrenite na emulator ili fizičkom uređaju
-3. Aplikacija će automatski učitati i prikazati:
-   - Prvi post sa detaljima
-   - Drugi komentar sa detaljima
-   - Toast sa brojem korisnika
+**KOPIRAJ I LEPIM (sve):**
+```java
+package com.example.vezbe7.api;
 
-## 📂 Struktura Fajlova
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+public class RetrofitClient {
+    // Za Beeceptor dummy-json (preporuka)
+    private static final String BASE_URL = "https://dummy-json.mock.beeceptor.com/";
+    
+    // Ili ako striktno trebaš app.beeceptor.com (i ako radi JSON):
+    // private static final String BASE_URL = "https://app.beeceptor.com/mock-server/dummy-json/";
+    
+    private static Retrofit retrofit;
+
+    public static Retrofit getRetrofitInstance() {
+        if (retrofit == null) {
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return retrofit;
+    }
+
+    public static ApiService getApiService() {
+        return getRetrofitInstance().create(ApiService.class);
+    }
+}
 ```
-Vezbe7/
-├── app/
-│   ├── build.gradle (sa Retrofit zavisnostima)
-│   ├── src/main/
-│   │   ├── AndroidManifest.xml (sa INTERNET permisijom)
-│   │   ├── java/com/example/vezbe7/
-│   │   │   ├── MainActivity.java (glavna aktivnost sa logikom)
-│   │   │   ├── model/
-│   │   │   │   ├── User.java
-│   │   │   │   ├── Post.java
-│   │   │   │   └── Comment.java
-│   │   │   └── api/
-│   │   │       ├── ApiService.java (interface sa GET zahtevima)
-│   │   │       └── RetrofitClient.java (Retrofit konfiguracija)
-│   │   └── res/layout/
-│   │       └── activity_main.xml (sa 3 TextView polja)
-```
 
-## 🌐 API Endpoint
-
-- **Base URL**: `https://app.beeceptor.com/mock-server/`
-- **Dostupne rute**:
-  - `/posts` - Svi postovi
-  - `/comments` - Svi komentari
-  - `/users` - Svi korisnici
-
-## 💡 Ključne Tehnologije
-
-- **Retrofit** - HTTP klijent sa type-safe zahtevima
-- **Gson** - JSON serijalizacija/deserijalizacija
-- **Callback** - Asinkreni obrada odgovora
-- **AsyncTask** - Pozadinski niti za mrežne zahteve
-
-## 🎯 Zahtevi Zadatka - Implementirano ✅
-
-- ✅ 1. Retrofit konfiguriran i HTTP zahtevi omogućeni
-- ✅ 2. Model klase kreirane (Post, User, Comment)
-- ✅ 3. GET zahtevi za prvi post i drugi komentar sa prikazom u TextView
-- ✅ 4. Toast poruka sa brojem korisnika
-- ✅ 5. INTERNET permisija dodata
-
-## 📝 Napomene
-
-- Svi zahtevi su asinkreni - aplikacija neće "zamrzavati" tokom učitavanja
-- Greške se hvataju i prikazuju u TextView poljima
-- Podaci se prikazuju samo prvi put - nema refresh mehanizma (može se dodati kasnije)
+**Šta se MENJA ako je drugačiji server:**
+- `BASE_URL` → zameni samo adresu, ostatak ostaje isti
 
 ---
 
-**Status**: ✅ Kompletna implementacija 7. vežbe - Retrofit HTTP zahtevi
+# 📦 DEO 2: KREIRAJ MODEL KLASE (Post, Comment, User)
+
+## `Post.java`
+
+**Gde:** `app/src/main/java/com/example/vezbe7/model/Post.java`
+
+**KOPIRAJ I LEPIM (sve):**
+```java
+package com.example.vezbe7.model;
+
+import com.google.gson.annotations.SerializedName;
+
+public class Post {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("userId")
+    private int userId;
+    @SerializedName("title")
+    private String title;
+    @SerializedName("body")
+    private String body;
+
+    public Post() {}
+    public Post(int id, int userId, String title, String body) {
+        this.id = id;
+        this.userId = userId;
+        this.title = title;
+        this.body = body;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getBody() { return body; }
+    public void setBody(String body) { this.body = body; }
+
+    @Override
+    public String toString() {
+        return "Post{id=" + id + ", userId=" + userId + ", title='" + title + "'}";
+    }
+}
+```
+
+---
+
+## `Comment.java`
+
+**Gde:** `app/src/main/java/com/example/vezbe7/model/Comment.java`
+
+**KOPIRAJ I LEPIM (sve):**
+```java
+package com.example.vezbe7.model;
+
+import com.google.gson.annotations.SerializedName;
+
+public class Comment {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("postId")
+    private int postId;
+    @SerializedName("name")
+    private String name;
+    @SerializedName("email")
+    private String email;
+    @SerializedName("body")
+    private String body;
+
+    public Comment() {}
+    public Comment(int id, int postId, String name, String email, String body) {
+        this.id = id;
+        this.postId = postId;
+        this.name = name;
+        this.email = email;
+        this.body = body;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public int getPostId() { return postId; }
+    public void setPostId(int postId) { this.postId = postId; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getBody() { return body; }
+    public void setBody(String body) { this.body = body; }
+
+    @Override
+    public String toString() {
+        return "Comment{id=" + id + ", postId=" + postId + ", name='" + name + "'}";
+    }
+}
+```
+
+---
+
+## `User.java`
+
+**Gde:** `app/src/main/java/com/example/vezbe7/model/User.java` (već treba da postoji — POTVRĐENO!)
+
+**Proveri da ima:**
+```java
+@SerializedName("name")
+private String name;
+
+@SerializedName("email")
+private String email;
+
+@SerializedName("phone")
+private String phone;
+```
+
+---
+
+## `ApiService.java`
+
+**Gde:** `app/src/main/java/com/example/vezbe7/api/ApiService.java`
+
+**KOPIRAJ I LEPIM (sve):**
+```java
+package com.example.vezbe7.api;
+
+import com.example.vezbe7.model.Comment;
+import com.example.vezbe7.model.Post;
+import com.example.vezbe7.model.User;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+
+public interface ApiService {
+
+    @GET("posts")
+    Call<List<Post>> getPosts();
+
+    @GET("comments")
+    Call<List<Comment>> getComments();
+
+    @GET("users")
+    Call<List<User>> getUsers();
+}
+```
+
+---
+
+# 🎯 DEO 3: KREIRAJ GET ZAHTEVE I ISPIS U TextView
+
+## U `MainActivity.java`
+
+### 3a. Dodaj TV reference (top dela klase, pre `onCreate`)
+
+**KOPIRAJ I LEPIM:**
+```java
+private TextView tvFirstPost;
+private TextView tvSecondComment;
+private TextView tvUsersCount;
+private ApiService apiService;
+```
+
+### 3b. U `onCreate()` inicijalizuj
+
+**KOPIRAJ I LEPIM u onCreate():**
+```java
+tvFirstPost = findViewById(R.id.tvFirstPost);
+tvSecondComment = findViewById(R.id.tvSecondComment);
+tvUsersCount = findViewById(R.id.tvUsersCount);
+
+apiService = RetrofitClient.getApiService();
+
+loadFirstPost();
+loadSecondComment();
+loadUsersCount();
+```
+
+### 3c. Dodaj tri metode (na kraju MainActivity klase, pre zatvorene zagrade)
+
+**KOPIRAJ I LEPIM sve tri:**
+
+```java
+private void loadFirstPost() {
+    apiService.getPosts().enqueue(new Callback<List<Post>>() {
+        @Override
+        public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+            if (response.isSuccessful() && response.body() != null) {
+                List<Post> posts = response.body();
+                if (!posts.isEmpty()) {
+                    Post firstPost = posts.get(0);
+                    String postText = "ID: " + firstPost.getId() + "\n" +
+                            "Korisnik ID: " + firstPost.getUserId() + "\n" +
+                            "Naslov: " + firstPost.getTitle() + "\n" +
+                            "Tekst: " + firstPost.getBody();
+                    tvFirstPost.setText(postText);
+                } else {
+                    tvFirstPost.setText("Nema dostupnih postova");
+                }
+            } else {
+                tvFirstPost.setText("Neuspešan odgovor: " + response.code());
+            }
+        }
+        @Override
+        public void onFailure(Call<List<Post>> call, Throwable t) {
+            tvFirstPost.setText("Greška pri učitavanju: " + t.getMessage());
+        }
+    });
+}
+
+private void loadSecondComment() {
+    apiService.getComments().enqueue(new Callback<List<Comment>>() {
+        @Override
+        public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+            if (response.isSuccessful() && response.body() != null) {
+                List<Comment> comments = response.body();
+                if (comments.size() > 1) {
+                    Comment secondComment = comments.get(1);
+                    String commentText = "ID: " + secondComment.getId() + "\n" +
+                            "Post ID: " + secondComment.getPostId() + "\n" +
+                            "Ime: " + secondComment.getName() + "\n" +
+                            "Email: " + secondComment.getEmail() + "\n" +
+                            "Tekst: " + secondComment.getBody();
+                    tvSecondComment.setText(commentText);
+                } else {
+                    tvSecondComment.setText("Nema drugog komentara");
+                }
+            } else {
+                tvSecondComment.setText("Neuspešan odgovor: " + response.code());
+            }
+        }
+        @Override
+        public void onFailure(Call<List<Comment>> call, Throwable t) {
+            tvSecondComment.setText("Greška pri učitavanju: " + t.getMessage());
+        }
+    });
+}
+
+private void loadUsersCount() {
+    apiService.getUsers().enqueue(new Callback<List<User>>() {
+        @Override
+        public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+            if (response.isSuccessful() && response.body() != null) {
+                List<User> users = response.body();
+                int usersCount = users.size();
+                tvUsersCount.setText("Ukupno korisnika: " + usersCount);
+                Toast.makeText(MainActivity.this, "Broj korisnika: " + usersCount, Toast.LENGTH_SHORT).show();
+            } else {
+                tvUsersCount.setText("Neuspešan odgovor: " + response.code());
+            }
+        }
+        @Override
+        public void onFailure(Call<List<User>> call, Throwable t) {
+            tvUsersCount.setText("Greška pri učitavanju: " + t.getMessage());
+        }
+    });
+}
+```
+
+---
+
+### 3d. Proveri XML Layout
+
+**Gde:** `app/src/main/res/layout/activity_main.xml` 
+
+**Obavezno treba da imaš ova tri TextView sa ID-evima:**
+```xml
+<TextView android:id="@+id/tvFirstPost" ... />
+<TextView android:id="@+id/tvSecondComment" ... />
+<TextView android:id="@+id/tvUsersCount" ... />
+```
+
+Ako ne imaš, dodaj ih.
+
+---
+
+### 3e. Import-i
+
+**U vrhu MainActivity.java dodaj (ako Android Studio nije automatski):**
+```java
+import com.example.vezbe7.api.ApiService;
+import com.example.vezbe7.api.RetrofitClient;
+import com.example.vezbe7.model.Comment;
+import com.example.vezbe7.model.Post;
+import com.example.vezbe7.model.User;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+```
+
+---
+
+# 🔴 TROUBLESHOOTING — Česti problemi
+
+| Problem | Uzrok | Rešenje |
+|---------|-------|--------|
+| **404 greška** | Ruta pogrešna | Testiraj u browser-u: `BASE_URL + /posts` |
+| **HTML umesto JSON** | Dashboard umesto API-ja | Koristi `https://dummy-json.mock.beeceptor.com/` |
+| **"Failed to connect"** | Nema interneta | Proveri emulator ima internet; testiraj `ping` iz PowerShell |
+| **JSON parse error** | Polja ne odgovaraju | Proveri `@SerializedName` — mora biti istu kao JSON ključ |
+| **NullPointerException** | TextView ID-evi ne postoje u XML | Dodaj `@+id/tvFirstPost` itd. u XML |
+
+---
+
+# 🧪 TEST KOMANDE (PowerShell)
+
+```powershell
+# Provera da li server ima JSON
+Invoke-RestMethod -Uri 'https://dummy-json.mock.beeceptor.com/posts'
+Invoke-RestMethod -Uri 'https://dummy-json.mock.beeceptor.com/comments'
+Invoke-RestMethod -Uri 'https://dummy-json.mock.beeceptor.com/users'
+```
+
+Ako vidiš JSON → OK!  
+Ako vidiš HTML → pogrešna adresa!
+
+---
+
+# 💾 BUILD & RUN (PowerShell)
+
+```powershell
+cd 'C:\Users\tijan\AndroidStudioProjects\Vezbe7'
+.\gradlew.bat clean assembleDebug
+.\gradlew.bat installDebug
+```
+
+---
+
+# 🎓 QUICK MEMORY (za usmeni — 5 sekundi)
+
+1. **BASE_URL** = `https://dummy-json.mock.beeceptor.com/`
+2. **ApiService** = interfejce sa `@GET(...)` — Retrofit spaja BASE_URL + ruta
+3. **Model klase** koriste `@SerializedName("key")` da mapiraju JSON na Java polja
+4. **MainActivity** poziva API `apiService.getPosts().enqueue(...)` i upišeš u TextView
+5. **Ako vidiš HTML** → pogodila si dashboard; koristi pravo mock hostname
+
+---
+
+✅ **GOTOVO! Spreman za kolokvijum i predaju!**
 
