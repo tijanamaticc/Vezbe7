@@ -50,10 +50,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
     // Za Beeceptor dummy-json (preporuka)
     private static final String BASE_URL = "https://dummy-json.mock.beeceptor.com/";
-    
-    // Ili ako striktno trebaš app.beeceptor.com (i ako radi JSON):
+
+    // Ako profesor traži drugu adresu, menjaš SAMO ovaj red:
     // private static final String BASE_URL = "https://app.beeceptor.com/mock-server/dummy-json/";
-    
+
+    // Ako je drugi mock server:
+    // private static final String BASE_URL = "https://neki-drugi-mock.mock.beeceptor.com/";
+
+    // Važno: BASE_URL mora da se završava sa "/".
     private static Retrofit retrofit;
 
     public static Retrofit getRetrofitInstance() {
@@ -90,6 +94,9 @@ package com.example.vezbe7.model;
 import com.google.gson.annotations.SerializedName;
 
 public class Post {
+    // Ako server vraća drugačija imena polja, menjaš samo @SerializedName.
+    // Primer: ako umesto title dođe subject -> @SerializedName("subject") private String title;
+
     @SerializedName("id")
     private int id;
     @SerializedName("userId")
@@ -136,6 +143,9 @@ package com.example.vezbe7.model;
 import com.google.gson.annotations.SerializedName;
 
 public class Comment {
+    // Ako se JSON polja razlikuju, ovde menjaš samo @SerializedName.
+    // Primer: ako email nije email nego userEmail -> @SerializedName("userEmail") private String email;
+
     @SerializedName("id")
     private int id;
     @SerializedName("postId")
@@ -192,6 +202,15 @@ private String email;
 private String phone;
 ```
 
+**Ako zadatak traži druga imena, menjaš samo ove anotacije:**
+```java
+// Primer:
+// @SerializedName("firstName") private String name;
+// @SerializedName("lastName") private String surname;
+// @SerializedName("email") private String email;
+// @SerializedName("phone") private String phone;
+```
+
 ---
 
 ## `ApiService.java`
@@ -209,10 +228,16 @@ import com.example.vezbe7.model.User;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 
 public interface ApiService {
 
+    // GET = čitanje podataka
     @GET("posts")
     Call<List<Post>> getPosts();
 
@@ -221,6 +246,20 @@ public interface ApiService {
 
     @GET("users")
     Call<List<User>> getUsers();
+
+    // Ako zadatak traži POST / PUT / DELETE, samo dodaj/odkomentariši potrebnu metodu:
+
+    // POST = dodavanje novog podatka
+    // @POST("posts")
+    // Call<Post> addPost(@Body Post post);
+
+    // PUT = izmena celog podatka
+    // @PUT("posts/{id}")
+    // Call<Post> updatePost(@Path("id") int id, @Body Post post);
+
+    // DELETE = brisanje podatka
+    // @DELETE("posts/{id}")
+    // Call<Void> deletePost(@Path("id") int id);
 }
 ```
 
@@ -253,6 +292,15 @@ apiService = RetrofitClient.getApiService();
 loadFirstPost();
 loadSecondComment();
 loadUsersCount();
+
+// Ako treba drugi element iz niza, promeni indeks u metodi:
+// prvi post -> posts.get(0)
+// drugi post -> posts.get(1)
+// treći post -> posts.get(2)
+
+// prvi komentar -> comments.get(0)
+// drugi komentar -> comments.get(1)
+// treći komentar -> comments.get(2)
 ```
 
 ### 3c. Dodaj tri metode (na kraju MainActivity klase, pre zatvorene zagrade)
@@ -267,7 +315,7 @@ private void loadFirstPost() {
             if (response.isSuccessful() && response.body() != null) {
                 List<Post> posts = response.body();
                 if (!posts.isEmpty()) {
-                    Post firstPost = posts.get(0);
+                    Post firstPost = posts.get(0); // promeni na get(1), get(2)... ako treba drugi/treći post
                     String postText = "ID: " + firstPost.getId() + "\n" +
                             "Korisnik ID: " + firstPost.getUserId() + "\n" +
                             "Naslov: " + firstPost.getTitle() + "\n" +
@@ -294,7 +342,7 @@ private void loadSecondComment() {
             if (response.isSuccessful() && response.body() != null) {
                 List<Comment> comments = response.body();
                 if (comments.size() > 1) {
-                    Comment secondComment = comments.get(1);
+                    Comment secondComment = comments.get(1); // promeni na get(0) za prvi komentar, get(2) za treći
                     String commentText = "ID: " + secondComment.getId() + "\n" +
                             "Post ID: " + secondComment.getPostId() + "\n" +
                             "Ime: " + secondComment.getName() + "\n" +
