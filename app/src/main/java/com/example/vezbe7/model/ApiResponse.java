@@ -4,6 +4,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class ApiResponse {
+    // ApiResponse je "omotač" (wrapper) koji koristimo kada server vraća
+    // jedan JSON objekat koji sadrži više nizova (npr. posts, comments, users).
+    // Ako server vraća direktno niz (npr. [ {...}, {...} ]), onda nije potreban ApiResponse
+    // i možemo koristiti direktno Call<List<Post>> ili slično.
     @SerializedName("posts")
     private List<Post> posts;
 
